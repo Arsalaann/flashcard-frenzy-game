@@ -13,20 +13,18 @@ export default function JoinLobby() {
     const [status, setStatus] = useState("Searching lobby...");
     const [countdown, setCountdown] = useState(null);
 
+    let interval;
     const startCountdown = () => {
         let count = 3;
         setCountdown(count);
 
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
             count -= 1;
             if (count > 0) {
                 setCountdown(count);
             } else {
                 clearInterval(interval);
-                setCountdown("GO!");
-                setTimeout(() => {
-                    router.push(`/game/${matchInfo.matchId}`);
-                }, 1000);
+                router.push(`/game/${matchInfo.matchId}`);
             }
         }, 1000);
     };
@@ -56,7 +54,7 @@ export default function JoinLobby() {
         });
 
         return () => {
-            supabase.removeChannel(channel);
+            clearInterval(interval);
         };
     }, [matchInfo]);
 
