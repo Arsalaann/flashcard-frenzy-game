@@ -31,16 +31,29 @@
   transition: all 0.1s ease-in-out;
 }
 
-/* Pressed effect */
+.buttonForLoggedIn{
+  background: #4cafef;
+  box-shadow: 0 5px #3783b6;
+}
+
 .button:active {
   box-shadow: 0 2px #2e7d32;
   transform: translateY(3px);
 }
 
+.buttonForLoggedIn:active{
+  box-shadow: 0 2px #3783b6;
+}
+
 .button:hover {
   background: #45a049;
-  transform: translateY(-2px);
-  box-shadow: 0 7px #2e7d32;
+  transform: scale(1.01);
+  box-shadow: 0 6px #2e7d32;
+}
+
+.buttonForLoggedIn:hover{
+  background: #459dd8;
+  box-shadow: 0 6px #3783b6;
 }
 
 
@@ -114,12 +127,15 @@
 }
 
 .logoutButton:hover{
-  border:1.5px solid rgb(43, 43, 43);
-  background: rgb(43, 43, 43);
-  color:white;
-  box-shadow: 0 0 5px rgb(88, 88, 88);
+  border:1.5px solid rgb(122, 122, 122);
+  background: none;
+  color:rgb(161, 161, 161);  
 }
 
 .logoutButton:active{
   border:1.5px solid rgb(42, 42, 42);
+}
+
+.countdownBox{
+  margin-top:5%;
 }

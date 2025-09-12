@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
-import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function Home() {
@@ -30,8 +29,12 @@ export default function Home() {
     };
   }, []);
 
-  const handlePlay = () => {
-    router.push("/game");
+  const handleCreateLobby = () => {
+    router.push("/create-lobby");
+  };
+
+  const handleJoinLobby = () => {
+    router.push("/join-lobby");
   };
 
   const handleLogin = () => {
@@ -55,7 +58,8 @@ export default function Home() {
 
       {user ? (
         <div>
-          <button onClick={handlePlay} className={styles.button}>Play</button>
+          <button onClick={handleCreateLobby} className={`${styles.button} ${styles.buttonForLoggedIn}`}>Create Lobby</button>
+          <button onClick={handleJoinLobby} className={`${styles.button} ${styles.buttonForLoggedIn}`}>Join Lobby</button>
           <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
         </div>
       ) : (
