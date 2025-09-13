@@ -77,11 +77,6 @@
   border-radius: 15px;
   padding: 1%;
   font-size: 1rem;
-  bottom: 2%;
+  bottom: 10%;
 }
 
-@media (max-width:800px){
-  .correctAnswerPrompt{
-    bottom:40%;
-  }
-}
