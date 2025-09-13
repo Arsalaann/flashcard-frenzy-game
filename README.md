@@ -38,8 +38,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # MongoDB
 MONGODB_URI=your_mongodb_connection_string
-MONGODB_DB=your_db_name
-
 
 ## ▶️ Running Locally
 
