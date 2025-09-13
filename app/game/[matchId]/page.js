@@ -28,11 +28,37 @@ export default function Game() {
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [timer, setTimer] = useState(10);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [correctAnswerPrompt,setCorrectAnswerPrompt]=useState("arsala ksnk asndakn aksndkadn asndk");
+    const [correctAnswerPrompt, setCorrectAnswerPrompt] = useState("");
     const [loading, setLoading] = useState(true);
 
-    const gameOverHandler = () => {
+    const gameOverHandler = async () => {
         setGameOver(true);
+        let winner = 'draw';
+        if (myScore > opponentScore)
+            winner = myEmail;
+        else if (myScore < opponentScore)
+            winner = opponentEmail;
+
+        try {
+            const res = await fetch("/api/update-winner", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    matchId,
+                    winner: winner
+                }),
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                console.error("Failed to update match:", data.error);
+            } else {
+                console.log("Match updated:", data);
+            }
+        } catch (err) {
+            console.error("Error updating match:", err);
+        }
+
         supabase.getChannels().forEach((ch) => supabase.removeChannel(ch));
     }
 
@@ -142,7 +168,7 @@ export default function Game() {
         await channelRef.current.send({
             type: "broadcast",
             event: "option_update",
-            payload: { option: option,email:myEmail }
+            payload: { option: option, email: myEmail }
         });
     };
 
@@ -192,7 +218,7 @@ export default function Game() {
         :
         (
             <div className={styles.gameContainer}>
-                {correctAnswerPrompt.length>0 && <div className={styles.correctAnswerPrompt}>{correctAnswerPrompt}</div>}
+                {correctAnswerPrompt.length > 0 && <div className={styles.correctAnswerPrompt}>{correctAnswerPrompt}</div>}
                 <div className={styles.playersBox}>
                     <div className={styles.playerEmail}>{myEmail}</div>
                     <strong>VS</strong>
