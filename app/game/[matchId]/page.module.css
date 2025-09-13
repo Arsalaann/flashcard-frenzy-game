@@ -80,3 +80,8 @@
   bottom: 2%;
 }
 
+@media (max-width:800px){
+  .correctAnswerPrompt{
+    bottom:40%;
+  }
+}
