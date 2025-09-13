@@ -50,7 +50,7 @@ export default function Login() {
             </form>
             {errorMsg && <p className={styles.error}>{errorMsg}</p>}
             <p>
-                Don't have an account?{" "}
+                {"Don't have an account? "}
                 <Link href="/signup">
                     <button className={styles.linkButton}>
                         Signup
