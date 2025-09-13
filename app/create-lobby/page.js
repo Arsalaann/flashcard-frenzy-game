@@ -101,7 +101,11 @@ export default function CreateLobby() {
   useEffect(() => {
     if (!matchId) return;
 
-    const channel = supabase.channel(`lobby:${matchId}`);
+    const channel = supabase.channel(`lobby:${matchId}`, {
+      config: {
+        broadcast: { self: true },
+      },
+    })
 
     let interval;
     channel.on("broadcast", { event: "start_match" }, ({ payload }) => {
@@ -128,7 +132,7 @@ export default function CreateLobby() {
     });
 
     return () => {
-        clearInterval(interval);
+      clearInterval(interval);
     };
   }, [matchId, router]);
 

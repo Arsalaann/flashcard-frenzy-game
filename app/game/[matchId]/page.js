@@ -24,10 +24,11 @@ export default function Game() {
     const [firstPlayerSent, setFirstPlayerSent] = useState(false);
     const [myScore, setMyScore] = useState(0);
     const [opponentScore, setOpponentScore] = useState(0);
-    const [playersAnswered, setPlayersAnswered] = useState({}); // keys: emails, value: boolean answered
+    const [playerAnswered, setPlayerAnswered] = useState(false);
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [timer, setTimer] = useState(10);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [correctAnswerPrompt,setCorrectAnswerPrompt]=useState("arsala ksnk asndakn aksndkadn asndk");
     const [loading, setLoading] = useState(true);
 
     const gameOverHandler = () => {
@@ -35,9 +36,9 @@ export default function Game() {
         supabase.getChannels().forEach((ch) => supabase.removeChannel(ch));
     }
 
-    useEffect(()=>{
-        return()=>supabase.getChannels().forEach((ch) => supabase.removeChannel(ch));
-    },[])
+    useEffect(() => {
+        return () => supabase.getChannels().forEach((ch) => supabase.removeChannel(ch));
+    }, [])
 
     useEffect(() => {
         const fetchPlayer = async () => {
@@ -60,120 +61,121 @@ export default function Game() {
         if (!myEmail || typeof matchId !== "string") return;
 
         const allChannels = supabase.getChannels();
-        console.log("channels:", allChannels);
-        const channel = allChannels.find(
-            (ch) => ch.topic === `realtime:lobby:${matchId}`
-        );
-
-        if (!channel) {
-            console.warn("No existing channel found, cannot join game page.");
-            return;
-        }
+        const channel = allChannels.find(ch => ch.topic === `realtime:lobby:${matchId}`);
+        if (!channel) return;
 
         channelRef.current = channel;
 
         if (!firstPlayerSent) {
-            channel.send({
-                type: "broadcast",
-                event: "player_email",
-                payload: { email: myEmail },
-            });
+            channel.send({ type: "broadcast", event: "player_email", payload: { email: myEmail } });
+            setFirstPlayerSent(true);
         }
 
-        channel.on("broadcast", { event: "player_email" }, ({ payload }) => {
-            console.log("player_email:", payload.email);
-            if (payload.email !== myEmail) {
-                setOpponentEmail(payload.email);
-                if (!firstPlayerSent) {
-                    channel.send({
-                        type: "broadcast",
-                        event: "player_email",
-                        payload: { email: myEmail },
-                    });
-                    setFirstPlayerSent(true);
+        const handlePlayerEmail = ({ payload }) => {
+            setOpponentEmail(prev => {
+                if (!prev && payload.email !== myEmail) {
+                    console.log("player_email:", payload.email);
+                    channel.send({ type: "broadcast", event: "player_email", payload: { email: myEmail } });
                     setLoading(false);
+                    return payload.email;
                 }
-            }
-        });
+                return prev;
+            });
+        };
 
-        channel.on("broadcast", { event: "score_update" }, ({ payload }) => {
-            if (payload.email === myEmail) {
+        const handleScoreUpdate = ({ payload }) => {
+            if (payload.email === myEmail)
                 setMyScore(payload.score);
-            } else {
+            else
                 setOpponentScore(payload.score);
-            }
-        });
+        };
 
-        channel.on("broadcast", { event: "question_update" }, ({ payload }) => {
-            setCurrentQIndex(payload.currentQIndex);
-            setTimer(payload.timer);
-            setPlayersAnswered(payload.playersAnswered || {});
-        });
+        const handleQuestionUpdate = ({ payload }) => {
+            setSelectedOption(null);
+            setCurrentQIndex((prev) => prev + 1);
+            setTimer(10);
+            setPlayerAnswered(false);
+            setCorrectAnswerPrompt("");
+        };
+
+        const handleOptionUpdate = ({ payload }) => {
+            setPlayerAnswered(true);
+            setSelectedOption(payload.option);
+            setCorrectAnswerPrompt(`${payload.email} answered correct!`);
+        };
+
+        channel.on("broadcast", { event: "player_email" }, handlePlayerEmail);
+        channel.on("broadcast", { event: "score_update" }, handleScoreUpdate);
+        channel.on("broadcast", { event: "question_update" }, handleQuestionUpdate);
+        channel.on("broadcast", { event: "option_update" }, handleOptionUpdate);
+
+        return () => {
+            channel.unsubscribe();
+        };
     }, [myEmail, matchId]);
 
 
 
 
 
-    const sendQuestionUpdate = async (updatedPlayersAnswered = {}, index = currentQIndex, time = timer) => {
+
+    const sendQuestionUpdate = async () => {
         if (!channelRef.current) return;
         await channelRef.current.send({
             type: "broadcast",
             event: "question_update",
-            payload: {
-                currentQIndex: index,
-                timer: time,
-                playersAnswered: updatedPlayersAnswered,
-            },
+            payload: {}
+        });
+    };
+
+    const sendScoreUpdate = async () => {
+        if (!channelRef.current) return;
+        await channelRef.current.send({
+            type: "broadcast",
+            event: "score_update",
+            payload: { email: myEmail, score: myScore + 1 }
+        });
+    };
+
+    const sendOptionUpdate = async (option) => {
+        if (!channelRef.current) return;
+        await channelRef.current.send({
+            type: "broadcast",
+            event: "option_update",
+            payload: { option: option,email:myEmail }
         });
     };
 
 
     const handleOptionClick = async (option) => {
-        if (playersAnswered[myEmail]) return;
-
-        const updatedAnswers = { ...playersAnswered, [myEmail]: true };
-        setPlayersAnswered(updatedAnswers);
-        setSelectedOption(option);
+        if (playerAnswered) return;
 
         if (option === questions[currentQIndex].answer) {
-            setMyScore((prev) => prev + 1);
-            await sendQuestionUpdate(updatedAnswers);
-
+            sendScoreUpdate();
+            await sendOptionUpdate(option);
             setTimeout(() => {
-                handleNextQuestion();
+                sendQuestionUpdate();
             }, 1000);
         } else {
-            await sendQuestionUpdate(updatedAnswers);
-        }
-
-    };
-
-    const handleNextQuestion = async () => {
-        setSelectedOption(null);
-        if (currentQIndex+1 < questions.length) {
-            const nextIndex = currentQIndex + 1;
-            setCurrentQIndex(nextIndex);
-            setPlayersAnswered({});
-            setTimer(10);
-            await sendQuestionUpdate({});
-        } else {
-            gameOverHandler();
+            setPlayerAnswered(true);
+            setSelectedOption(option);
         }
     };
-
 
     useEffect(() => {
         if (typeof matchId !== "string" || gameOver) return;
-        if (currentQIndex >= questions.length) return;
+        if (currentQIndex >= questions.length) {
+            gameOverHandler();
+            return;
+        };
         const interval = setInterval(async () => {
             setTimer((prev) => {
-                if (prev <= 1) {
+                if (prev <= 0) {
                     clearInterval(interval);
-                    const updatedAnswers = { ...playersAnswered, [myEmail]: true };
-                    setPlayersAnswered(updatedAnswers);
-                    sendQuestionUpdate(updatedAnswers);
-                    handleNextQuestion();
+                    setSelectedOption(null);
+                    setCurrentQIndex((prev) => prev + 1);
+                    setTimer(10);
+                    setPlayerAnswered(false);
                     return 0;
                 }
                 return prev - 1;
@@ -184,12 +186,13 @@ export default function Game() {
     }, [currentQIndex, gameOver]);
 
     if (loading)
-        return <div>waiting for players...</div>
-    return gameOver ?
+        return <div className={styles.gameContainer}>Waiting for players...</div>
+    return gameOver || currentQIndex >= questions.length ?
         <GameOver player1={myEmail} player2={opponentEmail} score1={myScore} score2={opponentScore} />
         :
         (
             <div className={styles.gameContainer}>
+                {correctAnswerPrompt.length>0 && <div className={styles.correctAnswerPrompt}>{correctAnswerPrompt}</div>}
                 <div className={styles.playersBox}>
                     <div className={styles.playerEmail}>{myEmail}</div>
                     <strong>VS</strong>
@@ -210,7 +213,7 @@ export default function Game() {
                                 : ""
                                 }`}
                             onClick={() => handleOptionClick(opt)}
-                            disabled={!!selectedOption || playersAnswered[myEmail]}
+                            disabled={!!selectedOption || playerAnswered}
                         >
                             {opt}
                         </button>

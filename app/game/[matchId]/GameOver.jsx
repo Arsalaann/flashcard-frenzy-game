@@ -19,7 +19,7 @@ export default function GameOver({ player1, player2, score1, score2 }) {
                     <h2>{player1}</h2>
                     <p>Score: {score1}</p>
                 </div>
-
+                <strong className={styles.vs}>VS</strong>
                 <div className={styles.playerBox}>
                     <h2>{player2}</h2>
                     <p>Score: {score2}</p>
