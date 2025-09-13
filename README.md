@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flashcard Frenzy Multiplayer
 
-## Getting Started
+A multiplayer flashcard quiz game where two logged-in players race to answer questions.  
+The first player to answer correctly scores a point.  
+Built with **Next.js**, **Supabase (Auth + Realtime)**, and **MongoDB** for persistent match history.  
 
-First, run the development server:
+---
 
-```bash
+## 🚀 Features
+- **Authentication** – Players sign in with Supabase Auth.
+- **Lobby System** – Players can create or join lobbies.
+- **Realtime Gameplay** – Supabase Realtime channels sync scores, answers, and timers instantly.
+- **Match History** – MongoDB stores match results (with `winner`, `createdAt`, `updatedAt`).
+- **Game Logic** –  
+  - Countdown before the game starts  
+  - Timer per question  
+  - Score tracking  
+  - Game-over screen with winner/loser/draw result
+
+---
+
+## 🛠️ Tech Stack
+- **Frontend**: Next.js (App Router, Client Components, CSS Modules)  
+- **Auth & Realtime**: Supabase (Auth + Realtime channels)  
+- **Database**: MongoDB (match history storage)  
+- **Deployment**: Vercel (recommended)  
+
+---
+
+
+## 🔑 Environment Variables
+Create a `.env.local` file at the root:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# MongoDB
+MONGODB_URI=your_mongodb_connection_string
+MONGODB_DB=your_db_name
+
+
+## ▶️ Running Locally
+
+# 1. Install dependencies
+npm install
+
+# 2. Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# 3. Visit
+http://localhost:3000
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+# 4. Open the game on another device or browser and you will automatically join the open lobby to play multiplayer
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
