@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import GameOver from './GameOver';
 import styles from "./page.module.css";
 
+let interval;
 // Hardcoded questions
 const questions = [
     { id: 1, question: "What is the capital of France?", options: ["Paris", "Rome", "Madrid", "Berlin"], answer: "Paris" },
@@ -125,6 +126,7 @@ export default function Game() {
         };
 
         const handleOptionUpdate = ({ payload }) => {
+            clearInterval(interval);
             setPlayerAnswered(true);
             setSelectedOption(payload.option);
             setCorrectAnswerPrompt(`${payload.email} answered correct!`);
@@ -194,7 +196,7 @@ export default function Game() {
             gameOverHandler();
             return;
         };
-        const interval = setInterval(async () => {
+        interval = setInterval(async () => {
             setTimer((prev) => {
                 if (prev <= 0) {
                     clearInterval(interval);
