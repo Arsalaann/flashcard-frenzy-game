@@ -71,12 +71,12 @@
 
 .correctAnswerPrompt{
   position:absolute;
-  width: 80%;
-  left:10%;
+  width: 70%;
+  left:15%;
   background: #3096339f;
   border-radius: 15px;
   padding: 1%;
   font-size: 1rem;
-  bottom: 10%;
+  bottom: 30%;
 }
 
