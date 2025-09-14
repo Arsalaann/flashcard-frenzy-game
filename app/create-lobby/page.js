@@ -143,6 +143,7 @@ export default function CreateLobby() {
       <Link href="/" className={styles1.backButton}>
         ←
       </Link>
+      <div className={styles.screenLeaveWarning}>Do not leave the screen otherwise lobby will be deleted</div>
       <h1 className={styles.title}>Create Lobby</h1>
       {matchId && user && (
         <>
